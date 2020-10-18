@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -88,6 +89,12 @@ func mainE() error {
 	flag.VarP(&includeFlags, "include", "I", includes_text)
 	flag.VarP(&undefineFlags, "undefine", "U", undefine_text)
 	flag.Parse()
+	if flag.NArg() != 1 {
+		if flag.NArg() == 0 {
+			return errors.New("missing argument: <spec>")
+		}
+		return fmt.Errorf("invalid usage: got %d arguments, expected exactly 1", flag.NArg())
+	}
 	if *verbose {
 		log.SetLevel(log.DebugLevel)
 	} else {
