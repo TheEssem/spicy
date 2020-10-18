@@ -1,12 +1,14 @@
 package main
 
 import (
-	flag "github.com/ogier/pflag"
-	log "github.com/sirupsen/logrus"
-	"github.com/trhodeos/n64rom"
-	"github.com/trhodeos/spicy"
 	"io/ioutil"
 	"os"
+
+	flag "github.com/ogier/pflag"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/trhodeos/n64rom"
+	"github.com/trhodeos/spicy"
 )
 
 const (
@@ -80,7 +82,7 @@ Uname Is passed to cpp(1) for use during its invocation.
 -B 0 An option that concerns only games supported by 64DD. Using this option creates a startup game. For information on startup games, please see Section 15.1, "Restarting," in the N64 Disk Drive Programming Manual.
 */
 
-func main() {
+func mainE() error {
 	flag.VarP(&defineFlags, "define", "D", defines_text)
 	flag.VarP(&includeFlags, "include", "I", includes_text)
 	flag.VarP(&undefineFlags, "undefine", "U", undefine_text)
@@ -92,7 +94,7 @@ func main() {
 	}
 	f, err := os.Open(flag.Arg(0))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer f.Close()
 
@@ -103,63 +105,67 @@ func main() {
 	preprocessed, err := spicy.PreprocessSpec(f, gcc, includeFlags, defineFlags, undefineFlags)
 	spec, err := spicy.ParseSpec(preprocessed)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	rom, err := n64rom.NewBlankRomFile(byte(*filldata))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	for _, w := range spec.Waves {
 		for _, seg := range w.RawSegments {
 			for _, include := range seg.Includes {
 				f, err := os.Open(include)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				spicy.CreateRawObjectWrapper(f, include+".o", ld)
 			}
 		}
 		entry, err := spicy.CreateEntryBinary(w, as)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		linked_object, err := spicy.LinkSpec(w, ld, entry)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		binarized_object, err := spicy.BinarizeObject(linked_object, objcopy)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		binarized_object_bytes, err := ioutil.ReadAll(binarized_object)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		rom.WriteAt(binarized_object_bytes, n64rom.CodeStart)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 	out, err := os.Create(*rom_image_file)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	// Pad the rom if necessary.
 	if *romsize_mbits > 0 {
 		minSize := int64(1000000 * *romsize_mbits / 8)
 		_, err := out.WriteAt([]byte{0}, minSize)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 	_, err = rom.Save(out)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	err = out.Close()
-	if err != nil {
-		panic(err)
+	return out.Close()
+}
+
+func main() {
+	if err := mainE(); err != nil {
+		log.Errorln("Error:", err)
+		os.Exit(1)
 	}
 }
