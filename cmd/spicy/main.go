@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -94,7 +95,7 @@ func mainE() error {
 	}
 	f, err := os.Open(flag.Arg(0))
 	if err != nil {
-		return err
+		return fmt.Errorf("could not open spec: %v", err)
 	}
 	defer f.Close()
 
@@ -105,48 +106,48 @@ func mainE() error {
 	preprocessed, err := spicy.PreprocessSpec(f, gcc, includeFlags, defineFlags, undefineFlags)
 	spec, err := spicy.ParseSpec(preprocessed)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not parse spec: %v", err)
 	}
 
 	rom, err := n64rom.NewBlankRomFile(byte(*filldata))
 	if err != nil {
-		return err
+		return fmt.Errorf("n64rom.NewBlankRomFile: %v", err)
 	}
 	for _, w := range spec.Waves {
 		for _, seg := range w.RawSegments {
 			for _, include := range seg.Includes {
 				f, err := os.Open(include)
 				if err != nil {
-					return err
+					return fmt.Errorf("could not open include: %v", err)
 				}
 				spicy.CreateRawObjectWrapper(f, include+".o", ld)
 			}
 		}
 		entry, err := spicy.CreateEntryBinary(w, as)
 		if err != nil {
-			return err
+			return fmt.Errorf("spicy.CreateEntryBinary: %v", err)
 		}
 		linked_object, err := spicy.LinkSpec(w, ld, entry)
 		if err != nil {
-			return err
+			return fmt.Errorf("spicy.LinkSpec: %v", err)
 		}
 		binarized_object, err := spicy.BinarizeObject(linked_object, objcopy)
 		if err != nil {
-			return err
+			return fmt.Errorf("spicy.BinarizeObject: %v", err)
 		}
 
 		binarized_object_bytes, err := ioutil.ReadAll(binarized_object)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not read binarized object: %v", err)
 		}
 		rom.WriteAt(binarized_object_bytes, n64rom.CodeStart)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not write ROM: %v", err)
 		}
 	}
 	out, err := os.Create(*rom_image_file)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create ROM: %v", err)
 	}
 	// Pad the rom if necessary.
 	if *romsize_mbits > 0 {
@@ -158,7 +159,7 @@ func mainE() error {
 	}
 	_, err = rom.Save(out)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not write ROM: %v", err)
 	}
 	return out.Close()
 }
