@@ -29,11 +29,12 @@ var (
 	undefineFlags                  = flag.StringArrayP("undefine", "U", nil, "macros to undefine in preprocessor")
 
 	// Non-standard options. Should all be optional.
-	ldCommand      = flag.String("ld_command", "mips64-elf-ld", "ld command to use")
-	asCommand      = flag.String("as_command", "mips64-elf-as", "as command to use")
-	cppCommand     = flag.String("cpp_command", "mips64-elf-gcc", "cpp command to use")
-	objcopyCommand = flag.String("objcopy_command", "mips64-elf-objcopy", "objcopy command to use")
-	fontFilename   = flag.String("font_filename", "font", "Font filename")
+	toolchainPrefix = flag.String("toolchain-prefix", "mips64-elf-", "prefix for commands in the toolchain")
+	ldCommand       = flag.String("ld_command", "", "ld command to use")
+	asCommand       = flag.String("as_command", "", "as command to use")
+	cppCommand      = flag.String("cpp_command", "", "cpp command to use")
+	objcopyCommand  = flag.String("objcopy_command", "", "objcopy command to use")
+	fontFilename    = flag.String("font_filename", "font", "Font filename")
 )
 
 /*
@@ -51,6 +52,13 @@ Uname Is passed to cpp(1) for use during its invocation.
 -r Provides an alternate ROM image file; the default is 'rom'.
 -B 0 An option that concerns only games supported by 64DD. Using this option creates a startup game. For information on startup games, please see Section 15.1, "Restarting," in the N64 Disk Drive Programming Manual.
 */
+
+func getCommand(flag, def string) string {
+	if flag != "" {
+		return flag
+	}
+	return *toolchainPrefix + def
+}
 
 func mainE() error {
 	flag.Parse()
@@ -71,10 +79,10 @@ func mainE() error {
 	}
 	defer f.Close()
 
-	gcc := spicy.NewRunner(*cppCommand)
-	ld := spicy.NewRunner(*ldCommand)
-	as := spicy.NewRunner(*asCommand)
-	objcopy := spicy.NewRunner(*objcopyCommand)
+	gcc := spicy.NewRunner(getCommand(*cppCommand, "gcc"))
+	ld := spicy.NewRunner(getCommand(*ldCommand, "ld"))
+	as := spicy.NewRunner(getCommand(*asCommand, "as"))
+	objcopy := spicy.NewRunner(getCommand(*objcopyCommand, "objcopy"))
 	preprocessed, err := spicy.PreprocessSpec(f, gcc, *includeFlags, *defineFlags, *undefineFlags)
 	if err != nil {
 		return fmt.Errorf("could not preprocess spec: %v", err)
