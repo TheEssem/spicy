@@ -4,12 +4,13 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/alecthomas/participle"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/alecthomas/participle"
+	log "github.com/sirupsen/logrus"
 )
 
 type Constant struct {

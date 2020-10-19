@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"text/template"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var ldArgs = []string{"-G 0", "-S", "-nostartfiles", "-nodefaultlibs", "-nostdinc", "-M"}
