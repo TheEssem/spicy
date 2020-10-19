@@ -2,15 +2,15 @@ package spicy
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Runner interface {
@@ -36,7 +36,7 @@ func (e ExecRunner) Run(r io.Reader, args []string) (io.Reader, error) {
 	err := cmd.Run()
 	log.Debug("stdout: ", out.String())
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Error running '%s': %s", e.command, errout.String()))
+		return nil, fmt.Errorf("Error running '%s': %v: %s", e.command, err, errout.String())
 	}
 	return &out, nil
 }
