@@ -13,46 +13,26 @@ import (
 	"github.com/trhodeos/n64rom"
 )
 
-const (
-	defines_text                           = "Defines passed to cpp."
-	includes_text                          = "Includes passed to cpp."
-	undefine_text                          = "Undefines passed to cpp.."
-	verbose_text                           = "If true, be verbose."
-	verbose_link_editor_text               = "If true, be verbose when link editing."
-	disable_overlapping_section_check_text = "If true, disable overlapping section checks."
-	romsize_text                           = "Rom size (MBits)"
-	filldata_text                          = "filldata byte"
-	bootstrap_filename_text                = "Bootstrap file (not currently used)"
-	header_filename_text                   = "Header file (not currently used)"
-	pif_bootstrap_filename_text            = "Pif bootstrap file (not currently used)"
-	rom_image_file_text                    = "Rom image filename"
-	spec_file_text                         = "Spec file to use for making the image"
-	ld_command_text                        = "ld command to use"
-	as_command_text                        = "as command to use"
-	cpp_command_text                       = "cpp command to use"
-	objcopy_command_text                   = "objcopy command to use"
-)
-
 var (
-	verbose                           = flag.BoolP("verbose", "d", false, verbose_text)
-	link_editor_verbose               = flag.BoolP("verbose_linking", "m", false, verbose_link_editor_text)
-	disable_overlapping_section_check = flag.BoolP("disable_overlapping_section_checks", "o", false, disable_overlapping_section_check_text)
-	romsize_mbits                     = flag.IntP("romsize", "s", -1, romsize_text)
-	filldata                          = flag.IntP("filldata_byte", "f", 0x0, filldata_text)
-	bootstrap_filename                = flag.StringP("bootstrap_file", "b", "Boot", bootstrap_filename_text)
-	header_filename                   = flag.StringP("romheader_file", "h", "romheader", header_filename_text)
-	pif_bootstrap_filename            = flag.StringP("pif2boot_file", "p", "pif2Boot", pif_bootstrap_filename_text)
-	rom_image_file                    = flag.StringP("rom_name", "r", "rom.n64", rom_image_file_text)
-	elf_file                          = flag.StringP("rom_elf_name", "e", "rom.out", rom_image_file_text)
-	defineFlags                       = flag.StringArrayP("define", "D", nil, defines_text)
-	includeFlags                      = flag.StringArrayP("include", "I", nil, includes_text)
-	undefineFlags                     = flag.StringArrayP("undefine", "U", nil, undefine_text)
+	verbose                           = flag.BoolP("verbose", "d", false, "print verbose information")
+	link_editor_verbose               = flag.BoolP("verbose_linking", "m", false, "print verbose information when link editing")
+	disable_overlapping_section_check = flag.BoolP("disable_overlapping_section_checks", "o", false, "disable checks for overlapping sections")
+	romsize_mbits                     = flag.IntP("romsize", "s", -1, "ROM size (Mbit)")
+	filldata                          = flag.IntP("filldata_byte", "f", 0x0, "fill byte for data in the ROM image")
+	bootstrap_filename                = flag.StringP("bootstrap_file", "b", "Boot", "bootstrap file (not currently used)")
+	header_filename                   = flag.StringP("romheader_file", "h", "romheader", "header file (not currently used)")
+	pif_bootstrap_filename            = flag.StringP("pif2boot_file", "p", "pif2Boot", "PIF bootstrap file (not currently used)")
+	rom_image_file                    = flag.StringP("rom_name", "r", "rom.n64", "output ROM image filename")
+	elf_file                          = flag.StringP("rom_elf_name", "e", "rom.out", "output ROM image filename")
+	defineFlags                       = flag.StringArrayP("define", "D", nil, "macro definition for preprocessor")
+	includeFlags                      = flag.StringArrayP("include", "I", nil, "header search path for preprocessor")
+	undefineFlags                     = flag.StringArrayP("undefine", "U", nil, "macros to undefine in preprocessor")
 
 	// Non-standard options. Should all be optional.
-	ld_command      = flag.String("ld_command", "mips64-elf-ld", ld_command_text)
-	as_command      = flag.String("as_command", "mips64-elf-as", as_command_text)
-	cpp_command     = flag.String("cpp_command", "mips64-elf-gcc", cpp_command_text)
-	objcopy_command = flag.String("objcopy_command", "mips64-elf-objcopy", objcopy_command_text)
+	ld_command      = flag.String("ld_command", "mips64-elf-ld", "ld command to use")
+	as_command      = flag.String("as_command", "mips64-elf-as", "as command to use")
+	cpp_command     = flag.String("cpp_command", "mips64-elf-gcc", "cpp command to use")
+	objcopy_command = flag.String("objcopy_command", "mips64-elf-objcopy", "objcopy command to use")
 	font_filename   = flag.String("font_filename", "font", "Font filename")
 )
 
