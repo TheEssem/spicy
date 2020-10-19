@@ -14,26 +14,26 @@ import (
 )
 
 var (
-	verbose                           = flag.BoolP("verbose", "d", false, "print verbose information")
-	link_editor_verbose               = flag.BoolP("verbose_linking", "m", false, "print verbose information when link editing")
-	disable_overlapping_section_check = flag.BoolP("disable_overlapping_section_checks", "o", false, "disable checks for overlapping sections")
-	romsize_mbits                     = flag.IntP("romsize", "s", -1, "ROM size (Mbit)")
-	filldata                          = flag.IntP("filldata_byte", "f", 0x0, "fill byte for data in the ROM image")
-	bootstrap_filename                = flag.StringP("bootstrap_file", "b", "Boot", "bootstrap file (not currently used)")
-	header_filename                   = flag.StringP("romheader_file", "h", "romheader", "header file (not currently used)")
-	pif_bootstrap_filename            = flag.StringP("pif2boot_file", "p", "pif2Boot", "PIF bootstrap file (not currently used)")
-	rom_image_file                    = flag.StringP("rom_name", "r", "rom.n64", "output ROM image filename")
-	elf_file                          = flag.StringP("rom_elf_name", "e", "rom.out", "output ROM image filename")
-	defineFlags                       = flag.StringArrayP("define", "D", nil, "macro definition for preprocessor")
-	includeFlags                      = flag.StringArrayP("include", "I", nil, "header search path for preprocessor")
-	undefineFlags                     = flag.StringArrayP("undefine", "U", nil, "macros to undefine in preprocessor")
+	verbose                        = flag.BoolP("verbose", "d", false, "print verbose information")
+	linkEditorVerbose              = flag.BoolP("verbose_linking", "m", false, "print verbose information when link editing")
+	disableOverlappingSectionCheck = flag.BoolP("disable_overlapping_section_checks", "o", false, "disable checks for overlapping sections")
+	romsizeMbits                   = flag.IntP("romsize", "s", -1, "ROM size (Mbit)")
+	filldata                       = flag.IntP("filldata_byte", "f", 0x0, "fill byte for data in the ROM image")
+	bootstrapFilename              = flag.StringP("bootstrap_file", "b", "Boot", "bootstrap file (not currently used)")
+	headerFilename                 = flag.StringP("romheader_file", "h", "romheader", "header file (not currently used)")
+	pifBootstrapFilename           = flag.StringP("pif2boot_file", "p", "pif2Boot", "PIF bootstrap file (not currently used)")
+	romImageFile                   = flag.StringP("rom_name", "r", "rom.n64", "output ROM image filename")
+	elfFile                        = flag.StringP("rom_elf_name", "e", "rom.out", "output ROM image filename")
+	defineFlags                    = flag.StringArrayP("define", "D", nil, "macro definition for preprocessor")
+	includeFlags                   = flag.StringArrayP("include", "I", nil, "header search path for preprocessor")
+	undefineFlags                  = flag.StringArrayP("undefine", "U", nil, "macros to undefine in preprocessor")
 
 	// Non-standard options. Should all be optional.
-	ld_command      = flag.String("ld_command", "mips64-elf-ld", "ld command to use")
-	as_command      = flag.String("as_command", "mips64-elf-as", "as command to use")
-	cpp_command     = flag.String("cpp_command", "mips64-elf-gcc", "cpp command to use")
-	objcopy_command = flag.String("objcopy_command", "mips64-elf-objcopy", "objcopy command to use")
-	font_filename   = flag.String("font_filename", "font", "Font filename")
+	ldCommand      = flag.String("ld_command", "mips64-elf-ld", "ld command to use")
+	asCommand      = flag.String("as_command", "mips64-elf-as", "as command to use")
+	cppCommand     = flag.String("cpp_command", "mips64-elf-gcc", "cpp command to use")
+	objcopyCommand = flag.String("objcopy_command", "mips64-elf-objcopy", "objcopy command to use")
+	fontFilename   = flag.String("font_filename", "font", "Font filename")
 )
 
 /*
@@ -71,10 +71,10 @@ func mainE() error {
 	}
 	defer f.Close()
 
-	gcc := spicy.NewRunner(*cpp_command)
-	ld := spicy.NewRunner(*ld_command)
-	as := spicy.NewRunner(*as_command)
-	objcopy := spicy.NewRunner(*objcopy_command)
+	gcc := spicy.NewRunner(*cppCommand)
+	ld := spicy.NewRunner(*ldCommand)
+	as := spicy.NewRunner(*asCommand)
+	objcopy := spicy.NewRunner(*objcopyCommand)
 	preprocessed, err := spicy.PreprocessSpec(f, gcc, *includeFlags, *defineFlags, *undefineFlags)
 	if err != nil {
 		return fmt.Errorf("could not preprocess spec: %v", err)
@@ -102,31 +102,31 @@ func mainE() error {
 		if err != nil {
 			return fmt.Errorf("spicy.CreateEntryBinary: %v", err)
 		}
-		linked_object, err := spicy.LinkSpec(w, ld, entry)
+		linkedObject, err := spicy.LinkSpec(w, ld, entry)
 		if err != nil {
 			return fmt.Errorf("spicy.LinkSpec: %v", err)
 		}
-		binarized_object, err := spicy.BinarizeObject(linked_object, objcopy)
+		binarizedObject, err := spicy.BinarizeObject(linkedObject, objcopy)
 		if err != nil {
 			return fmt.Errorf("spicy.BinarizeObject: %v", err)
 		}
 
-		binarized_object_bytes, err := ioutil.ReadAll(binarized_object)
+		binarizedObjectBytes, err := ioutil.ReadAll(binarizedObject)
 		if err != nil {
 			return fmt.Errorf("could not read binarized object: %v", err)
 		}
-		rom.WriteAt(binarized_object_bytes, n64rom.CodeStart)
+		rom.WriteAt(binarizedObjectBytes, n64rom.CodeStart)
 		if err != nil {
 			return fmt.Errorf("could not write ROM: %v", err)
 		}
 	}
-	out, err := os.Create(*rom_image_file)
+	out, err := os.Create(*romImageFile)
 	if err != nil {
 		return fmt.Errorf("could not create ROM: %v", err)
 	}
 	// Pad the rom if necessary.
-	if *romsize_mbits > 0 {
-		minSize := int64(1000000 * *romsize_mbits / 8)
+	if *romsizeMbits > 0 {
+		minSize := int64(1000000 * *romsizeMbits / 8)
 		_, err := out.WriteAt([]byte{0}, minSize)
 		if err != nil {
 			return err
