@@ -8,10 +8,18 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
+	"github.com/depp/shellquote"
 	log "github.com/sirupsen/logrus"
 )
+
+func logCommand(command string, args []string) {
+	text, err := shellquote.Command(append([]string{command}, args...))
+	if err != nil {
+		log.Panic("shellquote.Command:", err)
+	}
+	log.Infoln("Running", text)
+}
 
 type Runner interface {
 	Run(r io.Reader, args []string) (io.Reader, error)
@@ -26,7 +34,7 @@ func NewRunner(cmd string) ExecRunner {
 }
 
 func (e ExecRunner) Run(r io.Reader, args []string) (io.Reader, error) {
-	log.Infof("About to run %s %s\n", e.command, strings.Join(args, " "))
+	logCommand(e.command, args)
 	cmd := exec.Command(e.command, args...)
 	var out bytes.Buffer
 	var errout bytes.Buffer
