@@ -1,9 +1,8 @@
-# spicy
-[![Build Status](https://travis-ci.org/trhodeos/spicy.svg?branch=master)](https://travis-ci.org/trhodeos/spicy)
+# Spicy
 
-An open-source version of Nintendo64 sdk's mild.exe. Assembles segments into an
-n64-compatible rom. This binary should eventually be a drop in, multiplatform
-replacement for mild.exe.
+A fork of [https://github.com/trhodeos/spicy](github.com/trhodeos/spicy).
+
+An open-source version of the Nintendo 64 SDK's mild.exe (also known as makerom). Assembles segments into an N64-compatible ROM. This binary should eventually be a drop-in, multiplatform replacement for mild.exe.
 
 ## Usage
 

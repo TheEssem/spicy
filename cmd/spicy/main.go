@@ -9,8 +9,8 @@ import (
 	flag "github.com/ogier/pflag"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/depp/spicy"
 	"github.com/trhodeos/n64rom"
-	"github.com/trhodeos/spicy"
 )
 
 const (
