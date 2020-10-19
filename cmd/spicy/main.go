@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	flag "github.com/ogier/pflag"
 	log "github.com/sirupsen/logrus"
+	flag "github.com/spf13/pflag"
 
 	"github.com/depp/spicy"
 	"github.com/trhodeos/n64rom"
@@ -33,21 +33,6 @@ const (
 	objcopy_command_text                   = "objcopy command to use"
 )
 
-type arrayFlags []string
-
-func (i *arrayFlags) String() string {
-	return "List of strings"
-}
-
-func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
-var defineFlags arrayFlags
-var includeFlags arrayFlags
-var undefineFlags arrayFlags
-
 var (
 	verbose                           = flag.BoolP("verbose", "d", false, verbose_text)
 	link_editor_verbose               = flag.BoolP("verbose_linking", "m", false, verbose_link_editor_text)
@@ -59,6 +44,9 @@ var (
 	pif_bootstrap_filename            = flag.StringP("pif2boot_file", "p", "pif2Boot", pif_bootstrap_filename_text)
 	rom_image_file                    = flag.StringP("rom_name", "r", "rom.n64", rom_image_file_text)
 	elf_file                          = flag.StringP("rom_elf_name", "e", "rom.out", rom_image_file_text)
+	defineFlags                       = flag.StringArrayP("define", "D", nil, defines_text)
+	includeFlags                      = flag.StringArrayP("include", "I", nil, includes_text)
+	undefineFlags                     = flag.StringArrayP("undefine", "U", nil, undefine_text)
 
 	// Non-standard options. Should all be optional.
 	ld_command      = flag.String("ld_command", "mips64-elf-ld", ld_command_text)
@@ -85,9 +73,6 @@ Uname Is passed to cpp(1) for use during its invocation.
 */
 
 func mainE() error {
-	flag.VarP(&defineFlags, "define", "D", defines_text)
-	flag.VarP(&includeFlags, "include", "I", includes_text)
-	flag.VarP(&undefineFlags, "undefine", "U", undefine_text)
 	flag.Parse()
 	if flag.NArg() != 1 {
 		if flag.NArg() == 0 {
@@ -110,7 +95,7 @@ func mainE() error {
 	ld := spicy.NewRunner(*ld_command)
 	as := spicy.NewRunner(*as_command)
 	objcopy := spicy.NewRunner(*objcopy_command)
-	preprocessed, err := spicy.PreprocessSpec(f, gcc, includeFlags, defineFlags, undefineFlags)
+	preprocessed, err := spicy.PreprocessSpec(f, gcc, *includeFlags, *defineFlags, *undefineFlags)
 	if err != nil {
 		return fmt.Errorf("could not preprocess spec: %v", err)
 	}
