@@ -111,6 +111,9 @@ func mainE() error {
 	as := spicy.NewRunner(*as_command)
 	objcopy := spicy.NewRunner(*objcopy_command)
 	preprocessed, err := spicy.PreprocessSpec(f, gcc, includeFlags, defineFlags, undefineFlags)
+	if err != nil {
+		return fmt.Errorf("could not preprocess spec: %v", err)
+	}
 	spec, err := spicy.ParseSpec(preprocessed)
 	if err != nil {
 		return fmt.Errorf("could not parse spec: %v", err)
