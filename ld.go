@@ -56,18 +56,18 @@ SECTIONS {
       . = ALIGN(0x10);
       _{{.Name}}SegmentTextStart = .;
       {{range .Includes -}}
-        {{.}} (.text)
+        {{.}} (.text .text.*)
       {{end}}
       _{{.Name}}SegmentTextEnd = .;
       _{{.Name}}SegmentDataStart = .;
       {{range .Includes -}}
-        {{.}} (.data)
+        {{.}} (.data .data.*)
       {{end}}
       {{range .Includes -}}
-        {{.}} (.rodata*)
+        {{.}} (.rodata .rodata.*)
       {{end}}
       {{range .Includes -}}
-        {{.}} (.sdata)
+        {{.}} (.sdata .sdata.*)
       {{end}}
       . = ALIGN(0x10);
       _{{.Name}}SegmentDataEnd = .;
@@ -80,13 +80,13 @@ SECTIONS {
       . = ALIGN(0x10);
       _{{.Name}}SegmentBssStart = .;
       {{range .Includes -}}
-        {{.}} (.sbss)
+        {{.}} (.sbss .sbss.*)
       {{end}}
       {{range .Includes -}}
-        {{.}} (.scommon)
+        {{.}} (.scommon .scommon.*)
       {{end}}
       {{range .Includes -}}
-        {{.}} (.bss)
+        {{.}} (.bss .bss.*)
       {{end}}
       {{range .Includes -}}
         {{.}} (COMMON)
