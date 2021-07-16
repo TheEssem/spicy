@@ -1,4 +1,4 @@
-module github.com/depp/spicy
+module github.com/TheEssem/spicy
 
 go 1.16
 

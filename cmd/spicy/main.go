@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 
-	"github.com/depp/spicy"
+	"github.com/TheEssem/spicy"
 	"github.com/trhodeos/n64rom"
 )
 
